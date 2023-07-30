@@ -71,6 +71,20 @@ class JsonJobStorage(JobStorage):
                 return False
         return True
 
+    def get_top_jobs_by_salary(self, n):
+        jobs = self.get_jobs_by_criteria({})
+        for job in jobs:
+            if job['salary_from'] and job['salary_to']:
+                job['average_salary'] = (job['salary_from'] + job['salary_to']) / 2
+            elif job['salary_from']:
+                job['average_salary'] = job['salary_from']
+            elif job['salary_to']:
+                job['average_salary'] = job['salary_to']
+            else:
+                job['average_salary'] = 0
+        jobs.sort(key=lambda job: -job['average_salary'])
+        return [job for job in jobs[:n] if job['average_salary'] > 0]
+
 
 class Job:
     def __init__(self, title, url, salary, description):

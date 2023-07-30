@@ -20,15 +20,12 @@ def interact():
 
         if choice == '1':
             jobs = []
-
             print("\nВыберите платформу:")
             print("1. hh.ru")
             print("2. superjob.ru")
             platform_choice = input("> ")
-
             print("\nВведите поисковый запрос:")
             query = input("> ")
-
             if platform_choice == '1':
                 jobs = hh_api.get_jobs(text=query)
             elif platform_choice == '2':
@@ -36,31 +33,56 @@ def interact():
             else:
                 print("\nНеизвестная платформа. Пожалуйста, попробуйте снова.")
                 continue
-
             job_storage.add_jobs(jobs)
             print(f"\nДобавлено {len(jobs)} вакансий.")
 
         elif choice == '2':
-            print("\nВведите ключевое слово для фильтрации вакансий (или нажмите Enter, чтобы пропустить):")
-            keyword = input("> ")
-            jobs = job_storage.get_jobs_by_criteria({'title': keyword})
+            print("\n1. Показать вакансии с/без фильтров")
+            print("2. Показать топ-N вакансий по зарплате")
+            view_choice = input('> ')
+            if view_choice == '1':
+                print("\nВведите ключевое слово для фильтрации вакансий (или нажмите Enter, чтобы пропустить):")
+                keyword = input("> ")
+                jobs = job_storage.get_jobs_by_criteria({'title': keyword})
 
-            if jobs:
-                for job in jobs:
-                    print(f"\nНазвание: {job['title']}")
-                    if job['salary_from'] in [0, None] and job['salary_to'] in [0, None]:
-                        print('Зарплата: не указана')
-                    elif job['salary_from'] in [0, None]:
-                        print(f"Зарплата: до {job['salary_to']}")
-                    elif job['salary_to'] in [0, None]:
-                        print(f"Зарплата: от {job['salary_from']}")
-                    else:
-                        print(f"Зарплата: от {job['salary_from']} до {job['salary_to']}")
-                    print(f"Ссылка: {job['link']}")
-                    print(f"Описание: {job['description']}")
-                    print('-------------------------------------------------------------------------------------------')
-            else:
-                print("\nВакансий не найдено.")
+                if jobs:
+                    for job in jobs:
+                        print(f"\nНазвание: {job['title']}")
+                        if job['salary_from'] in [0, None] and job['salary_to'] in [0, None]:
+                            print('Зарплата: не указана')
+                        elif job['salary_from'] in [0, None]:
+                            print(f"Зарплата: до {job['salary_to']}")
+                        elif job['salary_to'] in [0, None]:
+                            print(f"Зарплата: от {job['salary_from']}")
+                        else:
+                            print(f"Зарплата: от {job['salary_from']} до {job['salary_to']}")
+                        print(f"Ссылка: {job['link']}")
+                        print(f"Описание: {job['description']}")
+                        print('---------------------------------------------------------------------------------------')
+                else:
+                    print("\nВакансий не найдено.")
+
+            elif view_choice == '2':
+                print('Введите количество вакансий для показа:')
+                top_n = int(input('> '))
+                jobs = job_storage.get_top_jobs_by_salary(top_n)
+
+                if jobs:
+                    for job in jobs:
+                        print(f"\nНазвание: {job['title']}")
+                        if job['salary_from'] in [0, None] and job['salary_to'] in [0, None]:
+                            print('Зарплата: не указана')
+                        elif job['salary_from'] in [0, None]:
+                            print(f"Зарплата: до {job['salary_to']}")
+                        elif job['salary_to'] in [0, None]:
+                            print(f"Зарплата: от {job['salary_from']}")
+                        else:
+                            print(f"Зарплата: от {job['salary_from']} до {job['salary_to']}")
+                        print(f"Ссылка: {job['link']}")
+                        print(f"Описание: {job['description']}")
+                        print('---------------------------------------------------------------------------------------')
+                else:
+                    print("\nВакансий не найдено.")
 
         elif choice == '3':
             job_ids = [job['id'] for job in job_storage.get_jobs_by_criteria({})]
